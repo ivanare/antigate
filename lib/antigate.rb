@@ -32,6 +32,7 @@ module Antigate
   		added = nil
   		loop do
   			added = add(url, ext)
+        next if added.nil?
   			if added.include? 'ERROR_NO_SLOT_AVAILABLE'
   				sleep(1)
   				next
@@ -45,6 +46,7 @@ module Antigate
   			status = nil
   			loop do
   				status = status(id)
+          next if status.nil?
   				if status.include? 'CAPCHA_NOT_READY'
   					sleep(1)
   					next
