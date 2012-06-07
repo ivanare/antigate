@@ -15,7 +15,7 @@ module Antigate
   end
 
   class Wrapper
-  	attr_accessor :phrase, :regsense, :numeric, :calc, :min_len, :max_len
+  	attr_accessor :phrase, :regsense, :numeric, :calc, :min_len, :max_len, :domain
 
   	def initialize(key)
   		@key = key
@@ -26,6 +26,7 @@ module Antigate
   		@calc = 0
   		@min_len = 0
   		@max_len = 0
+  		@domain = "antigate.com"
   	end
 
   	def recognize(url, ext)
@@ -61,7 +62,12 @@ module Antigate
   	end
 
   	def add(url, ext)
-  		captcha = Net::HTTP.get(URI(url)) rescue nil
+  	  uri = URI.parse(url)
+  	  http = Net::HTTP.new(uri.host, uri.port)
+  	  http.use_ssl = (uri.port == 443)
+  	  request = Net::HTTP::Get.new(uri.request_uri)
+  	  response = http.request(request)
+  	  captcha = response.body
   		if captcha
   			params = {
   				'method' => 'base64',
@@ -75,20 +81,20 @@ module Antigate
   				'min_len' => @min_len,
   				'max_len' => @max_len
   			}
-  			return Net::HTTP.post_form(URI('http://antigate.com/in.php'), params).body rescue nil
+  			return Net::HTTP.post_form(URI("http://#{@domain}/in.php"), params).body rescue nil
   		end
   	end
 
   	def status(id)
-  		return Net::HTTP.get(URI("http://antigate.com/res.php?key=#{@key}&action=get&id=#{id}")) rescue nil
+  		return Net::HTTP.get(URI("http://#{@domain}/res.php?key=#{@key}&action=get&id=#{id}")) rescue nil
   	end
 
   	def bad(id)
-  		return Net::HTTP.get(URI("http://antigate.com/res.php?key=#{@key}&action=reportbad&id=#{id}")) rescue nil
+  		return Net::HTTP.get(URI("http://#{@domain}/res.php?key=#{@key}&action=reportbad&id=#{id}")) rescue nil
   	end
 
   	def balance
-  		return Net::HTTP.get(URI("http://antigate.com/res.php?key=#{@key}&action=getbalance")) rescue nil
+  		return Net::HTTP.get(URI("http://#{@domain}/res.php?key=#{@key}&action=getbalance")) rescue nil
   	end
   end
 end
