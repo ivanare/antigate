@@ -62,7 +62,12 @@ module Antigate
   	end
 
   	def add(url, ext)
-  		captcha = Net::HTTP.get(URI(url)) rescue nil
+  	  uri = URI.parse(url)
+  	  http = Net::HTTP.new(uri.host, uri.port)
+  	  http.use_ssl = (uri.port == 443)
+  	  request = Net::HTTP::Get.new(uri.request_uri)
+  	  response = http.request(request)
+  	  captcha = response.body
   		if captcha
   			params = {
   				'method' => 'base64',
