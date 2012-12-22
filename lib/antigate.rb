@@ -30,35 +30,15 @@ module Antigate
     end
 
     def recognize(url, ext)
-      added = nil
-      loop do
-        added = add(url, ext)
-        next if added.nil?
-        if added.include? 'ERROR_NO_SLOT_AVAILABLE'
-          sleep(1)
-          next
-        else
-          break
-        end
-      end
-      if added.include? 'OK'
-        id = added.split('|')[1]
-        sleep(10)
-        status = nil
-        loop do
-          status = status(id)
-          next if status.nil?
-          if status.include? 'CAPCHA_NOT_READY'
-            sleep(1)
-            next
-          else
-            break
-          end
-        end
-        return [id, status.split('|')[1]]
-      else
-        return added
-      end
+      id = add(url, ext)
+      sleep(10)
+      return result(id)
+    end
+
+    def recognize_image(image, ext)
+      id = upload(image, ext)
+      sleep(10)
+      return result(id)
     end
 
     def add(url, ext)
@@ -68,11 +48,15 @@ module Antigate
       request = Net::HTTP::Get.new(uri.request_uri)
       response = http.request(request)
       captcha = response.body
-      if captcha
+      return upload(captcha, ext) if captcha
+    end
+
+    def upload(image, ext)
+      loop do
         params = {
           'method' => 'base64',
           'key' => @key,
-          'body' => Base64.encode64(captcha),
+          'body' => Base64.encode64(image),
           'ext' => ext,
           'phrase' => @phrase,
           'regsense' => @regsense,
@@ -81,7 +65,30 @@ module Antigate
           'min_len' => @min_len,
           'max_len' => @max_len
         }
-        return Net::HTTP.post_form(URI("http://#{@domain}/in.php"), params).body rescue nil
+        response = Net::HTTP.post_form(URI("http://#{@domain}/in.php"), params).body rescue nil
+
+        if response.nil?
+          next
+        elsif response.include? 'ERROR_NO_SLOT_AVAILABLE'
+          sleep(1)
+        elsif response.include? 'OK'
+          return response.split('|')[1]
+        else
+          raise response
+        end
+      end
+    end
+
+    def result(id)
+      loop do
+        status = status(id)
+        if status.nil?
+          next
+        elsif status.include? 'CAPCHA_NOT_READY'
+          sleep(1)
+        else
+          return [id, status.split('|')[1]]
+        end
       end
     end
 
