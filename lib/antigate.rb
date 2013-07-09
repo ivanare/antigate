@@ -16,6 +16,7 @@ module Antigate
 
   class Wrapper
   	attr_accessor :phrase, :regsense, :numeric, :calc, :min_len, :max_len, :domain
+    attr_reader :http_response
 
   	def initialize(key)
   		@key = key
@@ -66,8 +67,8 @@ module Antigate
   	  http = Net::HTTP.new(uri.host, uri.port)
   	  http.use_ssl = (uri.port == 443)
   	  request = Net::HTTP::Get.new(uri.request_uri)
-  	  response = http.request(request)
-  	  captcha = response.body
+  	  @http_response = http.request(request)
+  	  captcha = @http_response.body
   		if captcha
   			params = {
   				'method' => 'base64',
