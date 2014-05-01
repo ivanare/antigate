@@ -30,10 +30,10 @@ module Antigate
   		@domain = "antigate.com"
   	end
 
-  	def recognize(url, ext)
+  	def recognize(resource, ext)
   		added = nil
   		loop do
-  			added = add(url, ext)
+  			added = add(resource, ext)
         next if added.nil?
   			if added.include? 'ERROR_NO_SLOT_AVAILABLE'
   				sleep(1)
@@ -62,13 +62,17 @@ module Antigate
   		end
   	end
 
-  	def add(url, ext)
-  	  uri = URI.parse(url)
-  	  http = Net::HTTP.new(uri.host, uri.port)
-  	  http.use_ssl = (uri.port == 443)
-  	  request = Net::HTTP::Get.new(uri.request_uri)
-  	  @http_response = http.request(request)
-  	  captcha = @http_response.body
+  	def add(resource, ext)
+      begin
+    	  uri = URI.parse(resource)
+    	  http = Net::HTTP.new(uri.host, uri.port)
+    	  http.use_ssl = (uri.port == 443)
+    	  request = Net::HTTP::Get.new(uri.request_uri)
+    	  @http_response = http.request(request)
+    	  captcha = @http_response.body
+      rescue URI::InvalidURIError
+        captcha = resource
+      end
   		if captcha
   			params = {
   				'method' => 'base64',
