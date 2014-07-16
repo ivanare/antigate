@@ -19,12 +19,16 @@ Gem recognizes CAPTCHA by means Antigate.
     puts recognized[0] # ID recognized CAPTCHA
     puts recognized[1] # Text CAPTCHA
 
-#### Example
+#### From remote file
     captcha = Antigate.wrapper('660aaf58948bae3fa81362ef71b9ebcc')
     captcha.phrase = 1
     recognized = captcha.recognize('http://www.google.com/recaptcha/api/image?c=03AHJ_Vuu-Kun_wMo4M8JiWA87K6awfoiUxJCUF9KkQq3tCfyxjYELhHcsIJrcJ_qgqIQQsBw5vWAkpHBqP4VEHv1nwtoAnD5uZvwzHknOFyID4OrX0_6q8QXQ5TwkRn7qBxdt3QdX6D8NvPcFHFHzmEhu1yCJJQfTwQ', 'jpg')
     puts recognized[1]
-
+#### From local file
+    captcha = Antigate.wrapper('660aaf58948bae3fa81362ef71b9ebcc')
+    captcha.phrase = 1
+    recognized = captcha.recognize('captcha', 'jpg')
+    puts recognized[1]
 ### Get balance
     puts Antigate.balance(KEY)
 
