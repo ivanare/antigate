@@ -3,9 +3,9 @@ Gem recognizes CAPTCHA by means Antigate.
 
 [Registration Antigate account][2]
 
-### Gemfile Install
+#### Gemfile Install
    gem 'antigate', :github => 'SeNaP/antigate'
-### Install
+#### Install
    git clone https://github.com/SeNaP/antigate.git
    cd antigate && gem build antigate
    sudo gem install antigate.gem
