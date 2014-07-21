@@ -1,5 +1,3 @@
-require "antigate/version"
-
 module Antigate
   require 'net/http'
   require 'uri'
