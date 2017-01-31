@@ -61,7 +61,7 @@ module Antigate
 
   	def add(captcha_file, ext)
       if captcha_file.include?("http")
-    	  uri = URI.parse(url)
+    	  uri = URI.parse(captcha_file)
     	  http = Net::HTTP.new(uri.host, uri.port)
     	  http.use_ssl = (uri.port == 443)
     	  request = Net::HTTP::Get.new(uri.request_uri)
