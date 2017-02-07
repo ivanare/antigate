@@ -1,5 +1,3 @@
-require "antigate/version"
-
 module Antigate
   require 'net/http'
   require 'uri'
@@ -29,10 +27,10 @@ module Antigate
   		@domain = "antigate.com"
   	end
 
-  	def recognize(url, ext)
+  	def recognize(captcha_file, ext)
   		added = nil
   		loop do
-  			added = add(url, ext)
+  			added = add(captcha_file, ext)
         next if added.nil?
   			if added.include? 'ERROR_NO_SLOT_AVAILABLE'
   				sleep(1)
@@ -61,13 +59,17 @@ module Antigate
   		end
   	end
 
-  	def add(url, ext)
-  	  uri = URI.parse(url)
-  	  http = Net::HTTP.new(uri.host, uri.port)
-  	  http.use_ssl = (uri.port == 443)
-  	  request = Net::HTTP::Get.new(uri.request_uri)
-  	  response = http.request(request)
-  	  captcha = response.body
+  	def add(captcha_file, ext)
+      if captcha_file.include?("http")
+    	  uri = URI.parse(captcha_file)
+    	  http = Net::HTTP.new(uri.host, uri.port)
+    	  http.use_ssl = (uri.port == 443)
+    	  request = Net::HTTP::Get.new(uri.request_uri)
+    	  response = http.request(request)
+    	  captcha = response.body
+      else
+        captcha = File.read("#{captcha_file}.#{ext}")
+      end
   		if captcha
   			params = {
   				'method' => 'base64',
